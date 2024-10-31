@@ -16,8 +16,11 @@ for m = 1:2*N+1
         end        
     end    
 end
-
+figure(1)
+R = -N:N;
 colormap('hot');
-imagesc(abs(psi));
+imagesc(R,R,abs(psi));
 colorbar
-%}
+
+figure(2)
+

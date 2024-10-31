@@ -16,8 +16,32 @@ for m = 1:2*N+1
         end        
     end    
 end
-
+figure(1)
+R = -N:N;
 colormap('hot');
-imagesc(abs(psi));
+imagesc(R,R,abs(psi));
 colorbar
-%}
+
+
+N = 40000; 
+
+xe = randn(1, N); 
+xr = xe; 
+
+figure(2)
+Np = 100;
+xe_b = reshape(xe, [Np, N/Np]);
+xr_b = reshape(xr, [Np, N/Np]);
+
+D = zeros(2*Np - 1, N/Np);
+
+for j = 1:N/Np 
+    D(:,j) = xcorr(xe_b(:,j),xr_b(:,j), 'unbiased');
+end
+
+
+psi_b = fft(D,[],2);
+psi_b = fftshift(psi_b,2);
+colormap('hot');
+imagesc(abs(psi_b));
+colorbar
