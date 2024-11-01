@@ -38,7 +38,7 @@ xr_b = reshape(xr, [Np, N/Np]);
 D = zeros(2*Np - 1, N/Np);
 tic
 for j = 1:N/Np 
-    D(:,j) = xcorr(xe_b(:,j),xr_b(:,j), 'unbiased');
+    D(:,j) = xcorr(xe_b(:,j),xr_b(:,j));
 end
 
 
@@ -52,9 +52,9 @@ colorbar
 %----------------------------------------------------------------------------------------%
 %Segundo intento alg Batches
 tic
-D_aux_f = ifft(fft(xe_b,[],2) .* fft(xr_b,[],2));
-
-psi_b = fft(D,[],2);
+D_aux_f = ifft(fft(xe_b,2*Np-1,1) .* conj(fft(xr_b,2*Np-1,1)));
+D_aux_f = fftshift(D_aux_f, 1);
+psi_b = fft(D_aux_f,[],2);
 psi_b = fftshift(psi_b,2);
 toc
 
