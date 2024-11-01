@@ -1,6 +1,7 @@
 close all; clear; clc;
-
-N = 100; 
+%----------------------------------------------------------------------------------------%
+%Version bruta y literal de CAF
+N = 40; 
 
 xe = randn(1, N); 
 xr = xe; 
@@ -22,19 +23,20 @@ colormap('hot');
 imagesc(R,R,abs(psi));
 colorbar
 
-
-N = 40000; 
+%----------------------------------------------------------------------------------------%
+%Primer intento alg Batches
+N = 1000; 
 
 xe = randn(1, N); 
 xr = xe; 
 
 figure(2)
-Np = 100;
+Np = 25;
 xe_b = reshape(xe, [Np, N/Np]);
 xr_b = reshape(xr, [Np, N/Np]);
 
 D = zeros(2*Np - 1, N/Np);
-
+tic
 for j = 1:N/Np 
     D(:,j) = xcorr(xe_b(:,j),xr_b(:,j), 'unbiased');
 end
@@ -42,6 +44,23 @@ end
 
 psi_b = fft(D,[],2);
 psi_b = fftshift(psi_b,2);
+toc
+colormap('hot');
+imagesc(abs(psi_b));
+colorbar
+
+%----------------------------------------------------------------------------------------%
+%Segundo intento alg Batches
+tic
+D_aux_f = ifft(fft(xe_b,[],2) .* fft(xr_b,[],2));
+
+psi_b = fft(D,[],2);
+psi_b = fftshift(psi_b,2);
+toc
+
+%más óptimo, aprobecha mas la complejidad de fft / ifft
+
+figure(3)
 colormap('hot');
 imagesc(abs(psi_b));
 colorbar
