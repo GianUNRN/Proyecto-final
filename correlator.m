@@ -1,9 +1,9 @@
 close all; clear; clc;
 %----------------------------------------------------------------------------------------%
-%Version bruta y literal de CAF
+%% Version bruta y literal de CAF
 N = 40; 
 
-xe = randn(1, N); 
+xe = randn(1, N)*exp(1j*2*pi*2); 
 xr = xe; 
 
 psi = zeros(2*N+1, 2*N+1);
@@ -24,14 +24,14 @@ imagesc(R,R,abs(psi));
 colorbar
 
 %----------------------------------------------------------------------------------------%
-%Primer intento alg Batches
-N = 1000; 
+%% Primer intento alg Batches
+N = 40; 
 
 xe = randn(1, N); 
 xr = xe; 
 
 figure(2)
-Np = 25;
+Np = 4;
 xe_b = reshape(xe, [Np, N/Np]);
 xr_b = reshape(xr, [Np, N/Np]);
 
@@ -50,7 +50,7 @@ imagesc(abs(psi_b));
 colorbar
 
 %----------------------------------------------------------------------------------------%
-%Segundo intento alg Batches
+%% Segundo intento alg Batches
 tic
 D_aux_f = ifft(fft(xe_b,2*Np-1,1) .* conj(fft(xr_b,2*Np-1,1)));
 D_aux_f = fftshift(D_aux_f, 1);
