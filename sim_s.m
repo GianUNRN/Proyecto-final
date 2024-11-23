@@ -4,9 +4,9 @@ N = 2470;
 Np = 19;
 c = 3*10^8;
 n = 0:N-1;
-f_doppler = 7e4; 
+f_doppler = 0; 
 fs = 10e6;
-delay_samples = 6; 
+delay_samples = 10; 
 
 
 
