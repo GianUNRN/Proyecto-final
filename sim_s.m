@@ -34,9 +34,9 @@ figure(1)
 
 
 
-freq_axis = linspace(-fs*(2*Np - 1)/2, fs*(2*Np - 1)/2, size(psi, 2));
+freq_axis = linspace(-fs*(2*Np)/2, fs*(2*Np)/2, size(psi, 2));
 
-range_resolution = (1 / fs) * c / 2;
+range_resolution = (1 / fs) * c;
 range_axis = linspace(-size(psi, 1)/2, size(psi, 1)/2, size(psi, 2))* range_resolution;
 
 imagesc(freq_axis, range_axis, abs(psi));
