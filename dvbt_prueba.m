@@ -1,15 +1,20 @@
 close all; clear; clc;
 
 %%
-coded_data = CD(567);
 
+%coded_data = CD(567);
+load("c_data.mat")
 %%
 bit_intrl = Bit_Intrlv(coded_data);
-symb_intrl = Symb_Intrlv(bit_intrl);
+symb_intrl = Symb_Intrlv(bit_intrl)';
 
 %%
-qpsk_symb = bi2de(symb_intrl','left-msb');
-a_k = qammod(qpsk_symb, 2^size(symb_intrl,1), 'gray' );
+qpsk_r = bi2de(symb_intrl(:, [1,3,5]));
+qpsk_i = bi2de(symb_intrl(:, [2,4,6]));
+
+a_k = qpsk_r + 1j* qpsk_i;
+
+
 %%
 function x = CD(m)
     x = zeros(2176*m,1);
