@@ -49,6 +49,8 @@ figure(1)
 [CAF, f, r] = caf(xe, xr, Np, N, fs);
 imagesc(f, r, abs(CAF));
 colormap('hot')
+xticks(linspace(min(f), max(f), size(CAF,2)))
+yticks(linspace(min(r), max(r), size(CAF,1)))
 
 figure(2)
 tic()
@@ -56,7 +58,8 @@ xe_f = eca_clutter_filter(xr,xe, 1000, N);
 toc()
 [CAF_2, f_2, r_2] = caf(xe_f, xr, Np, N, fs);
 imagesc(f_2, r_2, abs(CAF_2));
-yticks(linspace(min(r_2), max(r_2), 20))
+xticks(linspace(min(f_2), max(f_2), size(CAF_2,2)))
+yticks(linspace(min(r_2), max(r_2), size(CAF_2,1)))
 colormap('hot')
 title('Filtro LS')
 

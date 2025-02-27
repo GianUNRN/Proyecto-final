@@ -34,13 +34,15 @@ title('Señal original')
 
 %-----------------------------------------------------------------------------%
 figure(2)
-tic()
+
 xe_f = eca_clutter_filter(xr,xe, 1000, N);
-toc()
+
 [CAF_2, f_2, r_2] = caf(xe_f, xr, Np, N, fs);
 imagesc(f_2, r_2, abs(CAF_2));
-yticks(linspace(min(r_2), max(r_2), 50))
+xticks(linspace(min(f_2), max(f_2), length(f_2)))
+yticks(linspace(min(r_2), max(r_2), length(r_2)))
 colormap('hot')
+colorbar()
 title('Filtro LS')
 
 %-----------------------------------------------------------------------------%
