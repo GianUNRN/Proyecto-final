@@ -1,149 +1,120 @@
 close all; clear; clc;
 
-%%
 
-%coded_data = CD(567);
+%%
+addpath('funciones\')
 load("c_data.mat")
-%%
-bit_intrl = Bit_Intrlv(coded_data);
-symb_intrl = Symb_Intrlv(bit_intrl)';
 
 %%
-qpsk_r = bi2de(symb_intrl(:, [1,3,5]));
-qpsk_i = bi2de(symb_intrl(:, [2,4,6]));
+bit_intrl = fg.Bit_Intrlv(coded_data);
+symb_intrl = fg.Symb_Intrlv(bit_intrl)';
 
-a_k = qpsk_r + 1j* qpsk_i;
+%%
+qam_r = bi2de(symb_intrl(:, [1,3,5]),'left-msb');
+qam_i = bi2de(symb_intrl(:, [2,4,6]),'left-msb');
+
+map = [7, 5, 1, 3, -7, -5, -1, -3]';
+
+ak_r = map(qam_r + 1);
+ak_i = map(qam_i + 1);
+
+ak = ak_r + 1i * ak_i;
+
+ak = ak/sqrt(42);
+ 
+%%
+
+Gen = fg.PRBSGen(1704);
+
+wk = Gen();
+
+k_continual_pilot = [0 48 54 87 141 156 192 201 255 279 282 333 432 450 483 525 531 618 636 714 759 765 780 804 873 888 918 939 942 969 984 1050 1101 1107 1110 1137 1140 1146 1206 1269 1323 1377 1491 1683 1704];
+continual_p = wk(k_continual_pilot+1);
 
 
 %%
-function x = CD(m)
-    x = zeros(2176*m,1);
+TPS_K = [34 50 209 346 413 569 595 688 790 901 1073 1219 1262 1286 1469 1594 1687];
 
-    n= 204;
-    k= 188;
-    p_gen = 'D8 + D4 + D3 + D2 + 1';
-    N = 188;
+s_0 = 1-2*wk(TPS_K);
 
-    % Interleaver Convolucional
-    nrows = 12; %cant de shift registers
-    slope = 1;  %diferencia de delays entre ramas
 
-    % Codigo Convolucional con perforaciones
-        
-    code_gen = [171 133]; 
-    len = 7; 
+
+
+
+%%
+
+
+ofdm_frame = zeros(68,1705);
+Tps = fg.TpsBits(21,1,0, 3/4,0, 2, 64, 1/4);
+
+
+TPS_Matrix = zeros(68, length(TPS_K));
+TPS_Matrix(1,:) = s_0.';
+TPS_Matrix(2:end,:) = TPS_Matrix(2:end,:) + Tps;
+
+
+for j= 2:68
+    TPS_Matrix(j,:) = (TPS_Matrix(j,:)*(-2) + 1).*TPS_Matrix(j-1,:);
+end
+
+ak_sin_uso = ak;
+
+for i = 1:68
+    ofdm_frame(i,k_continual_pilot+1) = 4/3 *(1 - 2*continual_p);
     
-    trellis = poly2trellis(len,code_gen);
-    
-    punc_pat = [1;0;1;1;1;0]; % R = 3/4 ==> X1 Y1 Y2 X3
-    for i = 0:m-1
-        
-        sym = randi([0 255],1, N);
-        
-        % Reed Solomon
-        
-        
-        msg = gf(sym, 8, p_gen);
-        y = rsenc(msg, n, k);
-        
-        
-        
-        intrlvData =convintrlv(y.x, nrows, slope);
-        
-        intrlvbits = de2bi(intrlvData)';
-        intrlvbits = intrlvbits(:);
-        
-        
-        coded_data = convenc(intrlvbits, trellis, punc_pat);
+    k_scatter_pilot = fg.Sct_Pilots(i-1, 1704);
+    scatter_p = wk(k_scatter_pilot+1);
+    ofdm_frame(i, k_scatter_pilot+1) = 4/3 *(1 - 2*scatter_p);
 
-        x(2176*i+1: 2176*i+2176) =  coded_data;
+
+    ofdm_frame(i,TPS_K+1) = TPS_Matrix(i,:);
+
+    data_cells = find(ofdm_frame(i,:) == 0);
+    num_data_cells = length(data_cells);
+
+    if(length(ak_sin_uso) > num_data_cells)
+        ofdm_frame(i, data_cells) = ak_sin_uso(1:num_data_cells);
+        ak_sin_uso = ak_sin_uso(num_data_cells+1:end);
     end
+
     
 end
 
-
-function bit_intrl = Bit_Intrlv(data)
-    bit_intrl = NaN;
-    if mod(data, 756) ~= 0
-        return;
-    end
-    demux_data = reshape(data, 6, []); 
-
-    H_bit = zeros(6, 126);
-    % Funciones de permutacion
-    H_bit(1, :) = (0:125) + 1;
-    H_bit(2, :) = mod((0:125) + 63, 126) + 1;
-    H_bit(3, :) = mod((0:125) + 105, 126)+ 1;
-    H_bit(4, :) = mod((0:125) + 42, 126)+ 1;
-    H_bit(5, :) = mod((0:125) + 21, 126)+ 1;
-    H_bit(6, :) = mod((0:125) + 84, 126)+ 1;
-    
-    m = size(demux_data,2)/126;
-    
-    idx = zeros(size(H_bit,1), m*size(H_bit,2));
-    
-    for i = 0:m-1
-        idx(:, 126*i+1: 126*i+126) =  H_bit + 126*i;
-    end
-    bit_intrl = zeros(size(idx));
-    bit_intrl(1,:) = demux_data(1,idx(1,:));
-    bit_intrl(2,:) = demux_data(2,idx(2,:));
-    bit_intrl(3,:) = demux_data(3,idx(3,:));
-    bit_intrl(4,:) = demux_data(4,idx(4,:));
-    bit_intrl(5,:) = demux_data(5,idx(5,:));
-    bit_intrl(6,:) = demux_data(6,idx(6,:));
-end
-
-function symb_intrl = Symb_Intrlv(data)
-    N_max = 1512; % 2k mode
-    symb_intrl = NaN;
-    if mod(size(data,2), N_max) ~= 0
-        return;
-    end
-   
-    M_max = 2048;
-    Nr = log2(M_max);
-    Rp = zeros(M_max-1, Nr - 1);
-    
-    Rp(1,:) = 0;
-    Rp(2,:) = 0;
-    Rp(3,:) = [1 zeros(1, Nr - 2)];
-    
-    for j = 3:M_max-1
-        Rp(j+1,1:end-1) =  Rp(j,2:end);
-        Rp(j+1,end) = xor(Rp(j,1),Rp(j,4));
-    end
-    
-    R_permutation = [4, 3, 9, 6, 2, 8, 1, 5, 7, 0] + 1;
-    
-    R = Rp(:, R_permutation);
-    
-    q = 0;
-    H = zeros(1, N_max);
-    for i = 1: M_max
-        aux = R(i, :) * (2.^(0:Nr-2)).';
-    
-        H(q+1) = mod(i-1, 2)* 2^(Nr-1) + aux;
-    
-        if(H(q+1) < N_max)
-            q = q + 1;
-        end
-    end
-    H = H + 1;
-    m = size(data,2)/N_max;
-    idx = zeros(1, m*length(H));
-    
-    for i = 0:m-1
-        idx(:, N_max*i+1: N_max*i+N_max) =  H + N_max*i;
-    end
-
-    symb_intrl = 3*zeros(size(data));
-    
-    for k = 0:2:size(data,2)-1
-        symb_intrl(:,idx(k+1)) = data(:, k+1); 
-        symb_intrl(:,k+2) = data(:, idx(k+2)); 
-    end
-    
+clear j i;
 
 
-end
+%%
+
+ofdm_frame = [zeros(68,171), ofdm_frame,zeros(68,172)];
+
+%%
+ofdm_frame_time = ifft(ofdm_frame, 2048, 2);
+[spec, f] = pwelch(ofdm_frame_time(1,:) + sqrt(6.5299e-04/10*0)*randn(1, 2048), ones(1,2048), 0, 2048);
+semilogy( spec)
+
+
+%%
+
+guard_p = 1/4;
+signal = [ofdm_frame_time(:, end - 2048*guard_p +1:end), ofdm_frame_time];
+
+signalrow = reshape(signal.', 1,[]);
+
+%%
+
+xe = [zeros(1,200), signalrow(1:end-200)];
+xr = signalrow(1:end);
+N = length(xr);
+Np = 320;
+
+
+Symb_T = 280*10^(-6);
+Samp_T = 2560;
+
+fs = Samp_T/Symb_T;
+[CAF, f, r] = PR.caf(xe, xr, Np, N, fs);
+
+figure(1)
+imagesc(f, r, abs(CAF));
+colormap('hot')
+
