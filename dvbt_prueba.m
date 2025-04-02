@@ -35,7 +35,7 @@ continual_p = wk(k_continual_pilot+1);
 %%
 TPS_K = [34 50 209 346 413 569 595 688 790 901 1073 1219 1262 1286 1469 1594 1687];
 
-s_0 = 1-2*wk(TPS_K);
+s_0 = 1-2*wk(TPS_K + 1);
 
 
 
@@ -89,7 +89,7 @@ ofdm_frame = [zeros(68,171), ofdm_frame,zeros(68,172)];
 
 %%
 ofdm_frame_time = ifft(ofdm_frame, 2048, 2);
-[spec, f] = pwelch(ofdm_frame_time(1,:) + sqrt(6.5299e-04/10*0)*randn(1, 2048), ones(1,2048), 0, 2048);
+[spec, ~] = pwelch(ofdm_frame_time(1,:), ones(1,2048), 0, 2048);
 semilogy( spec)
 
 
@@ -102,19 +102,64 @@ signalrow = reshape(signal.', 1,[]);
 
 %%
 
-xe = [zeros(1,200), signalrow(1:end-200)];
-xr = signalrow(1:end);
-N = length(xr);
-Np = 320;
+r = fft(ofdm_frame_time,2048,2);
+r = r(:, 172:172+1704);
+
+%%
+
+aux = fg.Exctract_TPS(r);
+dec = comm.BCHDecoder(67, 53, 'X^14 + X^9 + X^8 + X^6 + X^5 + X^4 + X^2 + X + 1');
+
+tpb = dec(aux);
+%%
+
+idx_sync = Find_Sync(tpb);
+
+ofdm_sym = Exctract_Pilots(r);
+qam_sym = Serial_Data(ofdm_sym);
 
 
-Symb_T = 280*10^(-6);
-Samp_T = 2560;
+function idx_sync = Find_Sync(TPS)
+    idx_sync = 0;
+    TPS = TPS(:).';
+    sync_tps = [[0,0,1,1,0,1,0,1,1,1,1,0,1,1,1,0];
+                [1,1,0,0,1,0,1,0,0,0,0,1,0,0,0,1]];
 
-fs = Samp_T/Symb_T;
-[CAF, f, r] = PR.caf(xe, xr, Np, N, fs);
+    sync_1 = strfind(TPS, sync_tps(1,:));
+    sync_2 = strfind(TPS, sync_tps(2,:));
 
-figure(1)
-imagesc(f, r, abs(CAF));
-colormap('hot')
+    if isequal(size(sync_1), [0,0])
+        if isequal(size(sync_2), [0,0])
+            return
+        else
+            idx_sync = sync_2;
+        end
+    else
+        idx_sync = sync_1;
+    end
 
+
+end
+
+
+function data = Exctract_Pilots(symbols)
+    k_continual_pilot = [0 48 54 87 141 156 192 201 255 279 282 333 432 450 483 525 531 618 636 714 759 765 780 804 873 888 918 939 942 969 984 1050 1101 1107 1110 1137 1140 1146 1206 1269 1323 1377 1491 1683 1704];
+    TPS_K = [34 50 209 346 413 569 595 688 790 901 1073 1219 1262 1286 1469 1594 1687];
+
+    num_symbols = size(symbols,2);
+    for i = 1:num_symbols
+        symbols(i, k_continual_pilot + 1) = 0;
+        symbols(i, TPS_K + 1) = 0;
+
+        k_scatter_pilot = fg.Sct_Pilots(i-1, 1704);
+        symbols(i, k_scatter_pilot + 1) = 0;
+    end
+    data = symbols;
+
+end
+
+function qamsymb = Serial_Data(data)
+    qamsymb = data.';
+    qamsymb = qamsymb(qamsymb ~= 0);
+    
+end

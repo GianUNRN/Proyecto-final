@@ -308,6 +308,25 @@ classdef fg
         
         
         end
+
+
+        function tps = Exctract_TPS(frame)
+
+            TPS_K = [34 50 209 346 413 569 595 688 790 901 1073 1219 1262 1286 1469 1594 1687];
+            TPS_symb = frame(:, TPS_K+1);
+            tps = -1*ones(67,1);
+            for j=2:68
+
+                if mean(abs(TPS_symb(j,:) - TPS_symb(j-1,:))) < 1e-3
+                    tps(j-1) = 0;
+                else 
+                    tps(j-1) = 1;
+
+                end
+            end
+
+    
+        end
     
 
    end
