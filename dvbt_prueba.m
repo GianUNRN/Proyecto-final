@@ -8,15 +8,15 @@ load("c_data.mat")
 %%
 bit_intrl = Coder.Bit_Intrlv(coded_data);
 
-symb_intrl = Coder.Symb_Intrlv(bit_intrl);
-%%
+symb_intrl = Coder.Symb_Intrlv(bit_intrl).';
+
 ak = Coder.Bi2QAM(symb_intrl);
  
 %%
 
-Gen = Coder.PRBSGen(1704);
 
-wk = Gen();
+
+wk = Coder.wk;
 
 k_continual_pilot = [0 48 54 87 141 156 192 201 255 279 282 333 432 450 483 525 531 618 636 714 759 765 780 804 873 888 918 939 942 969 984 1050 1101 1107 1110 1137 1140 1146 1206 1269 1323 1377 1491 1683 1704];
 continual_p = wk(k_continual_pilot+1);
@@ -76,9 +76,8 @@ clear j i;
 
 ofdm_frame = [zeros(68,171), ofdm_frame,zeros(68,172)];
 
-%%
 ofdm_frame_time = ifft(ofdm_frame, 2048, 2);
-%%
+
 [spec, ~] = pwelch(ofdm_frame_time(1,:), ones(1,2048), 0, 2048);
 semilogy( spec)
 
