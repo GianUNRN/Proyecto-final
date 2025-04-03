@@ -6,31 +6,20 @@ addpath('funciones\')
 load("c_data.mat")
 
 %%
-bit_intrl = fg.Bit_Intrlv(coded_data);
-symb_intrl = fg.Symb_Intrlv(bit_intrl)';
+bit_intrl = Coder.Bit_Intrlv(coded_data);
 
+symb_intrl = Coder.Symb_Intrlv(bit_intrl);
 %%
-qam_r = bi2de(symb_intrl(:, [1,3,5]),'left-msb');
-qam_i = bi2de(symb_intrl(:, [2,4,6]),'left-msb');
-
-map = [7, 5, 1, 3, -7, -5, -1, -3]';
-
-ak_r = map(qam_r + 1);
-ak_i = map(qam_i + 1);
-
-ak = ak_r + 1i * ak_i;
-
-ak = ak/sqrt(42);
+ak = Coder.Bi2QAM(symb_intrl);
  
 %%
 
-Gen = fg.PRBSGen(1704);
+Gen = Coder.PRBSGen(1704);
 
 wk = Gen();
 
 k_continual_pilot = [0 48 54 87 141 156 192 201 255 279 282 333 432 450 483 525 531 618 636 714 759 765 780 804 873 888 918 939 942 969 984 1050 1101 1107 1110 1137 1140 1146 1206 1269 1323 1377 1491 1683 1704];
 continual_p = wk(k_continual_pilot+1);
-
 
 %%
 TPS_K = [34 50 209 346 413 569 595 688 790 901 1073 1219 1262 1286 1469 1594 1687];
@@ -45,7 +34,7 @@ s_0 = 1-2*wk(TPS_K + 1);
 
 
 ofdm_frame = zeros(68,1705);
-Tps = fg.TpsBits(21,1,0, 3/4,0, 2, 64, 1/4);
+Tps = Coder.TpsBits(21,1,0, 3/4,0, 2, 64, 1/4);
 
 
 TPS_Matrix = zeros(68, length(TPS_K));
@@ -62,7 +51,7 @@ ak_sin_uso = ak;
 for i = 1:68
     ofdm_frame(i,k_continual_pilot+1) = 4/3 *(1 - 2*continual_p);
     
-    k_scatter_pilot = fg.Sct_Pilots(i-1, 1704);
+    k_scatter_pilot = Coder.Sct_Pilots(i-1, 1704);
     scatter_p = wk(k_scatter_pilot+1);
     ofdm_frame(i, k_scatter_pilot+1) = 4/3 *(1 - 2*scatter_p);
 
@@ -89,6 +78,7 @@ ofdm_frame = [zeros(68,171), ofdm_frame,zeros(68,172)];
 
 %%
 ofdm_frame_time = ifft(ofdm_frame, 2048, 2);
+%%
 [spec, ~] = pwelch(ofdm_frame_time(1,:), ones(1,2048), 0, 2048);
 semilogy( spec)
 
@@ -107,59 +97,17 @@ r = r(:, 172:172+1704);
 
 %%
 
-aux = fg.Exctract_TPS(r);
+aux = Decoder.Exctract_TPS(r);
 dec = comm.BCHDecoder(67, 53, 'X^14 + X^9 + X^8 + X^6 + X^5 + X^4 + X^2 + X + 1');
 
 tpb = dec(aux);
 %%
 
-idx_sync = Find_Sync(tpb);
+idx_sync = Decoder.Find_Sync(tpb);
 
-ofdm_sym = Exctract_Pilots(r);
-qam_sym = Serial_Data(ofdm_sym);
-
-
-function idx_sync = Find_Sync(TPS)
-    idx_sync = 0;
-    TPS = TPS(:).';
-    sync_tps = [[0,0,1,1,0,1,0,1,1,1,1,0,1,1,1,0];
-                [1,1,0,0,1,0,1,0,0,0,0,1,0,0,0,1]];
-
-    sync_1 = strfind(TPS, sync_tps(1,:));
-    sync_2 = strfind(TPS, sync_tps(2,:));
-
-    if isequal(size(sync_1), [0,0])
-        if isequal(size(sync_2), [0,0])
-            return
-        else
-            idx_sync = sync_2;
-        end
-    else
-        idx_sync = sync_1;
-    end
+ofdm_sym = Decoder.Exctract_Pilots(r);
+qam_sym = Decoder.Serial_Data(ofdm_sym);
+%%
+bits = Decoder.QAM2Bi(qam_sym);
 
 
-end
-
-
-function data = Exctract_Pilots(symbols)
-    k_continual_pilot = [0 48 54 87 141 156 192 201 255 279 282 333 432 450 483 525 531 618 636 714 759 765 780 804 873 888 918 939 942 969 984 1050 1101 1107 1110 1137 1140 1146 1206 1269 1323 1377 1491 1683 1704];
-    TPS_K = [34 50 209 346 413 569 595 688 790 901 1073 1219 1262 1286 1469 1594 1687];
-
-    num_symbols = size(symbols,2);
-    for i = 1:num_symbols
-        symbols(i, k_continual_pilot + 1) = 0;
-        symbols(i, TPS_K + 1) = 0;
-
-        k_scatter_pilot = fg.Sct_Pilots(i-1, 1704);
-        symbols(i, k_scatter_pilot + 1) = 0;
-    end
-    data = symbols;
-
-end
-
-function qamsymb = Serial_Data(data)
-    qamsymb = data.';
-    qamsymb = qamsymb(qamsymb ~= 0);
-    
-end
