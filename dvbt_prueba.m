@@ -5,14 +5,12 @@ close all; clear; clc;
 addpath('funciones\')
 load("c_data.mat")
 
-%%
 bit_intrl = Coder.Bit_Intrlv(coded_data);
 
 symb_intrl = Coder.Symb_Intrlv(bit_intrl).';
 
 ak = Coder.Bi2QAM(symb_intrl);
  
-%%
 
 
 
@@ -21,16 +19,9 @@ wk = Coder.wk;
 k_continual_pilot = [0 48 54 87 141 156 192 201 255 279 282 333 432 450 483 525 531 618 636 714 759 765 780 804 873 888 918 939 942 969 984 1050 1101 1107 1110 1137 1140 1146 1206 1269 1323 1377 1491 1683 1704];
 continual_p = wk(k_continual_pilot+1);
 
-%%
 TPS_K = [34 50 209 346 413 569 595 688 790 901 1073 1219 1262 1286 1469 1594 1687];
 
 s_0 = 1-2*wk(TPS_K + 1);
-
-
-
-
-
-%%
 
 
 ofdm_frame = zeros(68,1705);
@@ -77,9 +68,9 @@ clear j i;
 ofdm_frame = [zeros(68,171), ofdm_frame,zeros(68,172)];
 
 ofdm_frame_time = ifft(ofdm_frame, 2048, 2);
-
-[spec, ~] = pwelch(ofdm_frame_time(1,:), ones(1,2048), 0, 2048);
-semilogy( spec)
+% 
+% [spec, ~] = pwelch(ofdm_frame_time(1,:), ones(1,2048), 0, 2048);
+% semilogy( spec)
 
 
 %%
@@ -102,11 +93,14 @@ dec = comm.BCHDecoder(67, 53, 'X^14 + X^9 + X^8 + X^6 + X^5 + X^4 + X^2 + X + 1'
 tpb = dec(aux);
 %%
 
-idx_sync = Decoder.Find_Sync(tpb);
+% idx_sync = Decoder.Find_Sync(tpb);
 
-ofdm_sym = Decoder.Exctract_Pilots(r);
+ofdm_sym = Decoder.Exctract_Pilots(r, 1704);
 qam_sym = Decoder.Serial_Data(ofdm_sym);
 %%
-bits = Decoder.QAM2Bi(qam_sym);
+r_intrl_symb = Decoder.QAM2Bi(qam_sym);
 
+r_bits = Decoder.Symb_Deintrlv(r_intrl_symb.');
+
+r_data = Decoder.Bits_Deintrlv(r_bits);
 

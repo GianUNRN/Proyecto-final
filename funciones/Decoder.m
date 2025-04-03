@@ -85,9 +85,6 @@ classdef Decoder
 
 
          function deintrlv_symb = Symb_Deintrlv(intrl_data)
-             
-           
-
 
             N_max = 1512; % 2k mode
             deintrlv_symb = NaN;
@@ -109,13 +106,42 @@ classdef Decoder
                 c= c+1;   
             end
 
-            
-        
-        
-
-
          end
          
+
+         function deintrlv_bits = Bits_Deintrlv(intrl_bits)
+             deintrlv_bits = NaN;
+             if mod(size(intrl_bits,2), 126) ~= 0
+                 return;
+             end
+
+
+             H_bit = zeros(6, 126);
+             % Funciones de permutacion
+             H_bit(1, :) = (0:125) + 1;
+             H_bit(2, :) = mod((0:125) + 63, 126) + 1;
+             H_bit(3, :) = mod((0:125) + 105, 126)+ 1;
+             H_bit(4, :) = mod((0:125) + 42, 126)+ 1;
+             H_bit(5, :) = mod((0:125) + 21, 126)+ 1;
+             H_bit(6, :) = mod((0:125) + 84, 126)+ 1;
+
+             m = size(intrl_bits,2)/126;
+
+             idx = zeros(size(H_bit,1), m*size(H_bit,2));
+
+             for i = 0:m-1
+                 idx(:, 126*i+1: 126*i+126) =  H_bit + 126*i;
+             end
+             deintrlv_bits = zeros(size(idx));
+             deintrlv_bits(1,idx(1,:)) = intrl_bits(1,:);
+             deintrlv_bits(2,idx(2,:)) = intrl_bits(2,:);
+             deintrlv_bits(3,idx(3,:)) = intrl_bits(3,:);
+             deintrlv_bits(4,idx(4,:)) = intrl_bits(4,:);
+             deintrlv_bits(5,idx(5,:)) = intrl_bits(5,:);
+             deintrlv_bits(6,idx(6,:)) = intrl_bits(6,:);
+
+             deintrlv_bits = deintrlv_bits(:);
+         end
 
             
 
