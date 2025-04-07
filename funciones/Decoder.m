@@ -1,4 +1,18 @@
 classdef Decoder
+    properties (Constant)
+        n= 204;
+        k= 188;
+        p_gen = 'D8 + D4 + D3 + D2 + 1';
+
+        % Interleaver Convolucional
+        nrows = 12; %cant de shift registers
+        slope = 1;  %diferencia de delays entre ramas
+        D = Coder.nrows*(Coder.nrows-1)*Coder.slope;
+
+        code_gen = [171 133];
+        len = 7;
+        punc_pat = [1;0;1;1;1;0]; % R = 3/4 ==> X1 Y1 Y2 X3
+    end
     methods(Static)
          function tps = Exctract_TPS(frame)
 
@@ -44,6 +58,10 @@ classdef Decoder
 
          end
 
+         function k_idx = Sct_Pilots(l, Kmax)
+             in = 3*mod(l,4);
+             k_idx = in:12:Kmax;
+         end
 
          function data = Exctract_Pilots(symbols, Kmax)
              k_continual_pilot = [0 48 54 87 141 156 192 201 255 279 282 333 432 450 483 525 531 618 636 714 759 765 780 804 873 888 918 939 942 969 984 1050 1101 1107 1110 1137 1140 1146 1206 1269 1323 1377 1491 1683 1704];
@@ -54,7 +72,7 @@ classdef Decoder
                  symbols(i, k_continual_pilot + 1) = 0;
                  symbols(i, TPS_K + 1) = 0;
 
-                 k_scatter_pilot = 3*mod(i-1,4):12:Kmax;
+                 k_scatter_pilot = Decoder.Sct_Pilots(i-1, Kmax);
                  symbols(i, k_scatter_pilot + 1) = 0;
              end
              data = symbols;
@@ -139,11 +157,44 @@ classdef Decoder
              deintrlv_bits(4,idx(4,:)) = intrl_bits(4,:);
              deintrlv_bits(5,idx(5,:)) = intrl_bits(5,:);
              deintrlv_bits(6,idx(6,:)) = intrl_bits(6,:);
+            
 
+             v= 6;
+             i = 0:v-1;
+             e = fix(mod(i, v)/fix(v/2)) + 2*(mod(i,  fix(v/2)));
+             deintrlv_bits = deintrlv_bits(e+1,:);
              deintrlv_bits = deintrlv_bits(:);
          end
 
-            
+         function dec_vit = Viterbi_Dec(data)
+
+             trelis = poly2trellis(Decoder.len,Decoder.code_gen);
+             dec_vit = vitdec(data , trelis, 60,'term', 'hard', Coder.punc_pat);
+         end
+
+         function conv_deintrl = Conv_Deintrlv(data)
+             r_deintrl = convdeintrlv(data, Decoder.nrows, Decoder.slope);
+             conv_deintrl = r_deintrl(Decoder.D+1:end);
+         end
+
+         function [rs_decod, data_left] = RS_Deco(data)
+             trunc = floor(length(data)/(8*Decoder.n))*(8*Decoder.n);
+             data_trunc = data(1:trunc);
+             data_left = data(trunc+1:end);
+
+             symbs = reshape(data_trunc, 8,[])';
+
+             rs_gp = reshape(bi2de(symbs), Coder.n,[])';
+
+             dec_g = gf(rs_gp,8,Coder.p_gen);
+
+             decoded = rsdec(dec_g,Coder.n,Coder.k);
+
+
+             dec_data = decoded.x;
+             rs_decod = reshape(dec_data',1,[]);
+        
+         end
 
     end
 end
