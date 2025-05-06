@@ -1,3 +1,5 @@
 *.mat
 prueba.wav
 *.py
+*.mpeg
+*.ts

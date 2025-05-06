@@ -1,10 +1,15 @@
 close all; clear; clc;
-addpath('funciones\')
+
+addpath('..\funciones\')
 cargar_data = 0;
-Coder = Coder(1/2,2,64);
+Rate = 7/8;
+Const = 4;
+Coder = Coder(Rate,2,Const);
 Decoder = Decoder(2);
-Decoder = Decoder.Set_Mod(64);
-Decoder = Decoder.Set_Rate(1/2);
+Decoder = Decoder.Set_Mod(Const);
+Decoder = Decoder.Set_Rate(Rate);
+
+
 %%
 if cargar_data
     load("c_data.mat"); %#ok<*NOPRT> 
@@ -18,34 +23,39 @@ end
 
 
 %%
-
 [bit_intrl, left_bits] = Coder.Bit_Intrlv(coded_data);
 
 
 [symb_intrl, left_symbs] = Coder.Symb_Intrlv(bit_intrl);
 
-ak = Coder.Bi2QAM(symb_intrl.');
- 
+ak = Coder.Bi2QAM(symb_intrl);
+
 
 [ofdm_frame, ak_sin_uso] = Coder.Frame(ak,21,1,0, 3/4, 0, 1/4);
 
-
-
+[ofdm_frame2, ak_sin_uso2] = Coder.Frame(ak_sin_uso,21,1,0, 3/4, 0, 1/4);
 
 %%
 
+
+
 ofdm_frame_pad = [zeros(68,Coder.pad), ofdm_frame,zeros(68,Coder.pad+1)];
 
+ofdm_frame_pad2 = [zeros(68,Coder.pad), ofdm_frame2,zeros(68,Coder.pad+1)];
 
 ofdm_frame_time = ifft(ofdm_frame_pad, Coder.F_max, 2);
+ofdm_frame_time2 = ifft(ofdm_frame_pad2, Coder.F_max, 2);
 
+N0 = sqrt(mean(abs(ofdm_frame_time(1,:)).^2)/1000);
+n = (randn(size(ofdm_frame_time)) + 1j*randn(size(ofdm_frame_time)))*N0;
+ofdm_frame_time = ofdm_frame_time + n;
 
 [spec, ~] = pwelch(ofdm_frame_time(1,:), ones(1,Coder.F_max), 0, Coder.F_max);
 semilogy( spec)
 
 
-% %%
-% 
+%%
+
 % guard_p = 1/4;
 % signal = [ofdm_frame_time(:, end - 2048*guard_p +1:end), ofdm_frame_time];
 % signal2 =  [ofdm_frame_time2(:, end - 2048*guard_p +1:end), ofdm_frame_time2];
@@ -55,7 +65,7 @@ semilogy( spec)
 % 
 % signal_r = [signalrow, signalrow2];
 % 
-% [cor, lags] = xcorr( signal_r(1:600),signal_r(1:20000));
+% [cor, lags] = xcorr( signal_r);
 
 %%
 
@@ -74,10 +84,11 @@ tpb = dec(aux);
 
 idx_sync = Decoder.Find_Sync(tpb);
 
-ofdm_sym = Decoder.Exctract_Pilots(r); 
+qam_sym = Decoder.Exctract_Pilots(r); 
+%%
 
-
-qam_sym = Decoder.Serial_Data(ofdm_sym);
+phase_e = exp(-1j*pi/2);
+ofdm_frame_pad(1,:) = ofdm_frame_pad(1,:)*phase_e;
 
 %%
 r_intrl_symb = Decoder.QAM2Bi(qam_sym);
@@ -90,7 +101,6 @@ r_data = Decoder.Bits_Deintrlv(r_bits);
 
 r_dec = Decoder.Viterbi_Dec(r_data);
 
-
 r_deintrl = Decoder.Conv_Deintrlv(r_dec);
 %%
 
@@ -98,17 +108,6 @@ r_deintrl = Decoder.Conv_Deintrlv(r_dec);
 
 
 display(isequal(dec_data, sym(1:length(dec_data))))
-
-
-%%
-
-aux = 1:2000;
-aux2 = 4000:6000;
-[intrlvData, state] =convintrlv(aux, Coder.nrows, Coder.slope);
-
-[intrlvData2, state2] =convintrlv(aux2, Coder.nrows, Coder.slope,state);
-p2= convdeintrlv(intrlvData2,Coder.nrows, Coder.slope);
-
 
 
 
