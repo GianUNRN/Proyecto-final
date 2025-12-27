@@ -5,11 +5,14 @@ prueba.wav
 *.ts
 *.aux
 *.bbl
-*,bcf
+*.bcf
 *.lof
-*.run
-*.synctex
+*.log
+*.lot
+*.run.xml
+*.synctex.gz
 *.toc
 *.blg
 *.asv
 *.iso
+Data/
