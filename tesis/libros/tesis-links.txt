@@ -1,0 +1,9 @@
+https://www.researchgate.net/publication/277269466_Sistema_de_transmision_ISDB-T/fulltext/5591ea5b08ae1e1f9bb00ace/Sistema-de-transmision-ISDB-T.pdf
+
+https://www.enacom.gob.ar/multimedia/normativas/2013/Resolucion-7_13-Anexo%201.pdf
+
+https://www.dibeg.org/wp/wp-content/uploads/news/0706_3Argentina_ISDB-T_seminar/Argentina_ISDB-T_seminar_No3_transmission_system.pdf
+
+https://www.arib.or.jp/english/html/overview/doc/6-STD-B31v2_2-E1.pdf
+
+https://github.com/git-artes/gr-isdbt?tab=readme-ov-file

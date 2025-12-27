@@ -1,0 +1,216 @@
+\documentclass[12pt, letterpaper, oneside]{report}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{microtype}
+\usepackage{mathptmx} % Times New Roman-like font
+\usepackage{setspace}
+\usepackage[top=1in, bottom=1in, left=1.5in, right=1in]{geometry}
+\usepackage[spanish]{babel}
+\usepackage{csquotes}
+\usepackage{makeidx}
+
+\usepackage{tabularx}
+\newcolumntype{b}{>{\hsize=1.5\hsize}X}
+\newcolumntype{s}{>{\hsize=.5\hsize}X}
+
+\usepackage[backend=biber, style=ieee]{biblatex}
+\addbibresource{Bibliografia.bib} % Your bibliography file
+
+% Chapter formatting
+\usepackage{titlesec}
+\titleformat{\chapter}[display]
+{\normalfont\Large\bfseries}{\chaptertitlename\ \thechapter}{20pt}{\LARGE}
+\titlespacing*{\chapter}{0pt}{-30pt}{40pt}
+
+% Table of contents formatting
+\usepackage[titles]{tocloft}
+\renewcommand{\cftchapfont}{\normalfont\bfseries}
+\renewcommand{\cftchapleader}{\cftdotfill{\cftdotsep}}
+\addto\captionsspanish{\renewcommand{\tablename}{Tabla}}
+
+% Figure and table captions
+\usepackage{float}
+\usepackage[font=small, labelfont=bf]{caption}
+\usepackage{graphicx} % Include images
+\graphicspath{ {./figuras/} }
+
+\usepackage{booktabs}
+
+% Mathematics packages
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+
+% Theorems and definitions
+\newtheorem{theorem}{Theorem}[chapter]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+
+% Header and footer
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\leftmark}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+
+
+% Line spacing
+\onehalfspacing
+
+
+
+\newcommand \imagen[2]{\centerline{\includegraphics[scale=#1]{#2}}}
+\newcommand \p[1] {\hspace{1pt}\par\vspace{#1 pt}}
+\newcommand \figura[5]{
+	\begin{figure}[H]
+		\imagen{#1}{#2}\p{5}
+		\caption[#3]{#3 #4}
+		#5
+	\end{figure}
+}
+
+
+\begin{document}
+	
+	% Title page
+	\begin{titlepage}
+		\begin{center}
+			\vspace*{1cm}
+			\LARGE
+			PROYECTO INTEGRADOR DE LA CARRERA DE INGENIERÍA EN TELECOMUNICACIONES
+			
+			
+			\vspace{1.5cm}
+			
+		
+			
+			
+			
+			\textbf{\MakeUppercase{Mejora de la detección  en radares biestaticos pasivos basados en la señal de televisión digital ISDB-T a partir de la reconstrucción de la misma }}
+			
+		
+			
+			
+			
+			\vspace{1.5cm}
+			
+			\textbf{Mangieri Gianfranco}
+			
+			
+			
+			\vspace{1.5cm}
+			
+			\textbf{Dr. Javier Areta}\\Director
+			
+			
+			\vspace{1.5cm}
+			
+			
+			\today
+			
+			
+			\vspace{1.5cm}
+			\Large
+			Universidad Nacional De Rio Negro\\
+			Argentina
+			
+		\end{center}
+	\end{titlepage}
+	
+
+	
+	% Dedication (optional)
+	\cleardoublepage
+	\thispagestyle{empty}
+	\vspace*{\fill}
+	\begin{center}
+		\textit{To my family and mentors...}
+	\end{center}
+	\vspace*{\fill}
+	\cleardoublepage
+	
+
+	\cleardoublepage
+	\chapter*{Acronimos}
+	\addcontentsline{toc}{chapter}{Acronimos}
+		\begin{tabularx}{\textwidth}{sb}
+			\textbf{16QAM} & Modulación de amplitud en cuadratura de 16 estados, por sus siglas en inglés.\\
+			\textbf{64QAM} & Modulación de amplitud en cuadratura de 64 estados, por sus siglas en inglés.\\
+			\textbf{BW} & Ancho de banda, por sus siglas en inglés.\\
+			\textbf{CAF}& Función de ambigüedad cruzada, por sus siglas en inglés.\\
+			\textbf{COFDM}& Multiplexación por división de frecuencias ortogonales codificada, por sus siglas en inglés.\\
+			\textbf{DBPSK}& Modulación por desplazamiento de fase binaria diferencial, por sus siglas en inglés.\\
+			\textbf{FEC} & Corrección de errores hacia adelante, por sus siglas en inglés.\\
+			\textbf{FFT} & Transformada rápida de Fourier, por sus siglas en inglés.\\
+			\textbf{IFFT} & Transformada rápida de Fourier inversa, por sus siglas en inglés.\\
+			\textbf{IQ} & En fase y cuadratura, por sus siglas en inglés.\\
+			\textbf{ISDB-T} & Radiodifusión Digital de Servicios Integrados - Terrestre, por sus siglas en inglés.\\
+			\textbf{OFDM} & Multiplexación por división de frecuencias ortogonales, por sus siglas en inglés.\\
+			\textbf{PRBS} & Secuencia binaria psudo-random, por sus siglas en inglés.\\
+			\textbf{QAM} & Modulación de amplitud en cuadratura, por sus siglas en inglés.\\
+			\textbf{QPSK} & Modulación por desplazamiento de fase cuaternaria, por sus siglas en inglés.\\
+			\textbf{RCS} & Sección equivalente de radar, por sus siglas en inglés.\\
+			\textbf{RS} & Reed-Solomon.\\
+			\textbf{SNR} & Relación señal a ruido, por sus siglas en inglés.\\
+			\textbf{TDT} & Televisión digital terrestre.\\
+			\textbf{TMCC} & [completar].\\
+			\textbf{CFAR} & [completar]\\
+			\textbf{DSI} &  [completar]\\			
+		\end{tabularx}
+		
+	
+	\cleardoublepage
+	
+	
+	% Table of Contents
+	\tableofcontents
+	\cleardoublepage
+	
+	% List of Figures
+	\listoffigures
+	\addcontentsline{toc}{chapter}{Índice de figuras}
+	\cleardoublepage
+	
+	% List of Tables
+	
+	\renewcommand*\listtablename{Índice de tablas}
+	\listoftables
+	\addcontentsline{toc}{chapter}{Índice de tablas}
+	\cleardoublepage
+	
+		% Abstract
+	\cleardoublepage
+	\addcontentsline{toc}{chapter}{Resumen}
+	\begin{abstract}
+		
+		
+		\vspace{0.5cm}
+		
+		\doublespacing
+		This is where you write your abstract. It should provide a concise summary of your research, including the problem statement, methodology, key findings, and conclusions. Typically, an abstract is between 150-350 words.
+		
+		\textbf{Keywords:} keyword1, keyword2, keyword3, keyword4
+	\end{abstract}
+	\cleardoublepage
+
+%	\include{capitulos/introduccion}
+%	\include{capitulos/radar pasivo}
+	
+	\include{capitulos/isdb-tb}
+%	\include{capitulos/cadena de procesamiento}
+%	\include{capitulos/resultados}
+%	\include{capitulos/conclusiones}
+	% References
+	\cleardoublepage
+	\addcontentsline{toc}{chapter}{Bibliografía}
+
+	\printbibliography
+	
+	
+	\end{document}

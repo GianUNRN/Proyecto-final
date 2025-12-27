@@ -1,0 +1,92 @@
+\chapter{Transmisión de Señal de TV Digital Terrestre ISDB-T}
+
+
+En Argentina, la transmisión de TDT está regulada por el ENACOM a través de la resolucion 7/13. Esta establece el esquema ISDB-Tb definido por la norma ABNT NBR 15601. Además, en el Anexo 1 se establece las especificaciones técnicas, tales como el tratamiento de datos, la modulación y la transmisión. En este documento también se definen los modos de recepción, especificándose la recepción total o parcial, denominada 1-seg. Asimismo, la normativa describe cómo se divide el espectro de un canal de 8 MHz en 13 segmentos, siendo el segmento central el destinado a la recepción parcial. Además, en la Figura X se presenta la cadena completa de procesamiento.
+
+
+	En la Figura \ref{fig:bloques_isdb} puede observarse todos los bloques de procesamiento aplicado en un transmisor de TDT. Este capitulo se encarga de explicar cada uno de ellos en el contexto de transmisión y recepción parcial 1-seg. 
+	
+	\figura{.5}{./isdb/orden_canales.png}{Orden de los segmentos en el canal de 8 MHz.}{ Fuente: \cite{isdbt}.}{\label{fig:canales_isdb}}
+	
+	\figura{.5}{./isdb/1seg.png}{Recepción total y parcial.}{ Fuente: \cite{isdbt}.}{\label{fig:1seg}}
+	
+	
+	\figura{.7}{./isdb/cod_bloques.png}{Codificación de canal.}{ Fuente: \cite{isdbt}}{\label{fig:bloques_isdb}}
+	
+	
+	
+	\section{Dispersión de energía}
+	Luego del tratamiento de los *transport streams*, el primer bloque es el dispersor de energía. Para ello se utiliza una secuencia pseudoaleatoria que modula los bits. Esto se hace a partir de un shift register retroalimentado, el cual genera la secuencia, y una compuerta XOR que invierta los datos en función de la secuencia. La configuración inicial del generador esta dada por la semilla [] y el polinomio [], como se muestra en la Figura X. 
+	
+	\section{Código RS}
+	Una vez dispersada la energía, se aplica el primer nivel de codificación. Se utiliza un código RS ( ) con capacidad para detectar y corregir hasta **x** errores. Para esto se utiliza el polinomio generador []. 
+	\section{Entrelazador de byte}
+	
+	Posteriormente, los datos se entrelazan a nivel de byte mediante un interleaver convolucional, consistente en una cascada de shift registers con distintos niveles de profundidad, tal como se muestra en la Figura X, de manera que las distintas ramas sufran distintos retardos y así generar el entrelazaminento.
+	
+	
+	\figura{.7}{./isdb/intrlv_conv.png}{Entrelazador de bytes.}{ Fuente: \cite{isdbt}.}{\label{fig:intrlv_conv}}
+	
+	
+	\section{Código Convolucional}
+	
+	A continuación, comienza el segundo nivel de codificación. En esta etapa se emplea un código convolucional puntuado, cuyos polinomios característicos son [ ] y [ ] para las señales X e Y. Dependiendo del patrón de puntuado, la combinación correspondiente de estas señales se utilizará como salida. En la Tabla X se detallan las combinaciones asociadas a cada patrón.
+	
+	
+	\figura{.7}{./isdb/conv_code.png}{Diagrama en bloques del código convolucional.}{ Fuente: \cite{isdbt}.}{\label{fig:conv_code}}
+	
+	\section{Entrelazador de bit}
+	Análogamente al entrelazador de bytes, se utiliza un interleaver convolucional en donde el tamaño del registro es un bit y la cantidad de ramas y retardos, dados por la profundidad de los registros, depende del modo y modulación de operación.
+	
+	
+	\section{Mapeo de símbolos QAM}
+	
+	Una vez completado el segundo nivel de codificación, se aplica una segunda etapa de entrelazado, esta vez a nivel de bit. De manera análoga a la anterior, se utiliza un *interleaver* convolucional, aunque en este caso cada registro almacena únicamente un bit. Finalmente, los bits se mapean a símbolos de una de las tres modulaciones QAM disponibles: QPSK (grupos de 2 bits), 16-QAM (grupos de 4 bits) y 64-QAM (grupos de 6 bits). En todos los casos, los bits pares e impares representan la parte real e imaginaria, respectivamente, siguiendo el mapeo especificado.
+	
+	\subsubsection{QPSK}
+	\figura{.7}{./isdb/qpsk.png}{Mapeo de bits a símbolos QPSK.}{ Fuente: \cite{isdbt}.}{\label{fig:qpsk}}
+	\begin{equation}
+		a_k = 1 - 2  b_0  +j - 2j  b_1
+	\end{equation}
+	
+	
+	\subsubsection{16 QAM}
+	\figura{.7}{./isdb/16qam.png}{Mapeo de bits a símbolos 16 QAM.}{ Fuente: \cite{isdbt}.}{\label{fig:16qam}}
+	
+	\begin{align}
+		\mathbb{\textbf{R}}\lbrace a_k \rbrace &= 3 - 6 b_0 - 2  b_2 + 4  b_0  b_2\\
+		\mathbb{\textbf{I}}\lbrace a_k \rbrace &= 3 - 6 b_1 - 2  b_3 + 4  b_1  b_3 
+	\end{align}
+		
+	
+	
+	\subsubsection{32 QAM}
+	\figura{.9}{./isdb/32qam.png}{Mapeo de bits a símbolos 32 QAM.}{ Fuente: \cite{isdbt}.}{\label{fig:32qam}}
+	\begin{align}
+		\mathbb{\textbf{R}}\lbrace a_k \rbrace &= 7 -14  b_0 - 6  b_2 - 2  b_4 + 12 ¿ b_0  b_2 + 4  b_0  b_4 + 4  b_2  b_4 - 2  b_0  b_2  b_4\\
+		\mathbb{\textbf{I}}\lbrace a_k \rbrace &= 7 -14  b_1 - 6  b_3 - 2  b_5 + 12  b_1  b_3 + 4  b_1  b_5 + 4  b_3  b_5 - 2  b_1  b_3  b_5
+	\end{align}
+	
+	\section{Entrelazador de tiempo y frecuencia}
+	\section{Estructura de frame OFDM}
+	\figura{.7}{./isdb/frame.png}{Estructura de datos en el frame OFDM.}{ Fuente: \cite{isdbt}.}{\label{fig:frame}}
+	\subsubsection{Pilotos y PRBS}
+	\figura{.7}{./isdb/pilotos.png}{Distribucion de portadoras pilotos.}{ Fuente: \cite{isdbt}.}{\label{fig:pilotos}}
+	
+	\figura{.7}{./isdb/prbs.png}{Generador de secuencia binaria pseudo aleatoria .}{ Fuente: \cite{isdbt}.}{\label{fig:prbs}}
+	\section{Frecuencia de muestreo y frecuencias centrales}
+	
+\chapter{Recepcion}
+Para la recepcion de una señal ISDBT se implean los siguientes bloques de procesamiento
+
+En primer lugar es necesario identificar los simbolos OFDM, esto se hace a traves del prefijo ciclico agergado en la etapa de tranmision. Este al ser una fraccion de la parte final del mensaje puede identificarse
+usando una correlacion. Al tomar X cantidad de muestras podemos obtener el incio del simbolo como el pico maximo de la correlacion sumado a la duracion del CP. 
+
+Una vez identificado el simbolo, el siguiente paso es corregir el error de fase presente en la señal. Esto puede hacerse tambien a partir del CP
+viendo la diferencia de fase entre este (en el incio del mensaje) y su parte correspondiente en el payload (en el final del mensaje). 
+Sin embargo, esta correccion no es suficiente por si misma. Para terminar de centrar el espectro y ubicar la posicion de las 
+distintas portadoresa se utilizan las portadoras piloto. Al ser estas una secuencia conocida y en posiciones predeterminadas,
+pueden ser usadas con una correlacion para encontrar la poscicion de las portadoras usando
+[eq]
+en donde el pico maximo indicara que la secuencia conocida se alineo con su contraparte dentro de los datos del simbolo OFDM. 
+Ya con esto pueden extraerse los datos de control y de transmision y proceder con la demodulacion de manera acorde.

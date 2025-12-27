@@ -1,7 +1,7 @@
 close all; clear; clc;
 
 format long
-N = 2500; 
+    
 
 Np = 50;
 c = 3*10^8;

@@ -1,0 +1,226 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage{fancyhdr}
+\usepackage[utf8]{inputenc}
+\usepackage[backend=biber, style=ieee]{biblatex}
+\addbibresource{Bibliografia.bib} % Your bibliography file
+
+\usepackage[spanish]{babel}
+\usepackage{csquotes} % Recomendado por biblatex
+\usepackage{hyperref} % Para URLs
+\usepackage{url}
+\usepackage{setspace}
+\usepackage[margin=2.5cm,headheight=26pt,includeheadfoot]{geometry}
+
+\usepackage{setspace}
+\usepackage{graphicx}
+\geometry{top=2.5cm, bottom=2.5cm, left=3cm, right=3cm}
+\setstretch{1.3}
+
+\begin{document}
+	
+		
+		
+	\thispagestyle{fancy}
+
+	\lhead{\includegraphics[scale=1]{encabezado.png}}
+	\rhead{Plan de Proyecto Final Integrador\\Ingenieria en Telecomunicaciones\\ Mangieri Gianfranco}
+	\begin{flushright}
+		San Carlos de Bariloche, \today
+	\end{flushright}
+	
+	\vspace{1cm}
+	
+	\noindent
+	A \\
+	Jorge Cogo, Director de la Carrera de Ingeniería en Telecomunicaciones\\
+	Universidad Nacional de Rio Negro.
+%	Departamento de Estudiantes \\
+%	Universidad Nacional de Río Negro \\
+%	Sede Andina \\
+	
+%	\vspace{0.8cm}
+%	
+%	De mi mayor consideración:
+	
+	\vspace{0.5cm}
+	
+	
+	
+	
+	Por la presente, me dirijo a usted con el fin de elevar el anteproyecto correspondiente al Trabajo Final de la carrera de Ingeniería en Telecomunicaciones para su revisión por parte del Consejo Asesor.
+	
+	Sin otro particular, quedo a disposición por cualquier observación o corrección que se considere pertinente.
+	
+	\vspace{2.5cm}
+	
+	Atentamente,
+	
+	
+	Mangieri Gianfranco.
+	
+	
+	
+
+%	
+%	Tengo el agrado de dirigirme a usted, en el marco establecido por el ``Protocolo General para la Elaboración de Trabajos Finales de carreras de la Sede Andina'', a fin de presentar el plan de trabajo propuesto para dar comienzo al desarrollo de mi \textbf{Proyecto Final Integrador} de la carrera de Ingeniería en Telecomunicaciones.  
+%	
+%	El tema a desarrollar es: \textbf{“Mejora de la detección en radares biestáticos pasivos basados en la señal de televisión digital ISDB-T a partir de la reconstrucción de la misma”}, el cual integra dos áreas centrales de la carrera: \textbf{Comunicaciones Inalámbricas} y \textbf{Procesamiento Digital de Señales}.  
+%	
+%	Se propone como director al \textbf{Dr. Javier Areta} (Profesor de la Carrera Ingeniería Electrónica, Sede Andina, UNRN – Docente/Investigador UNRN), quien avala esta presentación como firmante de la nota.  
+%	
+%	Sin más, lo saludo cordialmente,
+%	
+%	\vspace{2cm}
+%	
+%	\noindent
+%	\textbf{Gianfranco Mangieri} \\
+%	DNI: [completar] \\[0.5cm]
+%	
+%	\noindent
+%	\textbf{Dr. Javier Areta} \\
+%	Profesor, UNRN Sede Andina \\
+%	DNI: [completar]
+%	
+	\newpage
+%	
+%	%=====================
+	% CUERPO DEL ANTEPROYECTO
+	%=====================
+	
+	\begin{center}
+		\vspace*{1cm}
+		
+		
+		
+		
+		\textbf{\MakeUppercase{Mejora de la detección  en radares biestaticos pasivos basados en la señal de televisión digital ISDB-T a partir de la reconstrucción de la misma }}
+		
+		
+		
+		
+		
+		\vspace{3.5cm}
+		
+		\textbf{Mangieri Gianfranco}
+		
+		
+		
+		\vspace{1.5cm}
+		
+		\textbf{Dr. Javier Areta}\\Director
+		
+		
+		\vspace{2.5cm}
+		
+		
+		\today
+		
+		
+		\vspace{1.5cm}
+		\Large
+		Universidad Nacional De Rio Negro\\
+		Argentina
+		
+	\end{center}
+	\vspace{1cm}
+	\newpage
+	\section*{1 - Objetivos}
+	
+	\textbf{Objetivo general:}  
+	Mejorar la capacidad de detección en radares biestáticos pasivos mediante el uso de la señal de Televisión Digital Terrestre (ISDB-T) como iluminador de oportunidad, a partir de la reconstrucción y procesamiento de dicha señal.
+	
+	\textbf{Objetivos específicos:}
+	\begin{itemize}
+		\item Analizar la geometría y fundamentos teóricos de los radares pasivos biestáticos.
+		\item Estudiar la estructura de la señal ISDB-T y su potencial como iluminador de oportunidad.
+		\item Implementar un modulador/demodulador ISDB-T en MATLAB para la reconstrucción de la señal.
+		\item Desarrollar en Python la cadena de procesamiento radar: filtrado, procesamiento rango-doppler y detección.
+		\item Incorporar la etapa de reconstrucción y remodulación de la señal ISDB-T (1-seg) para aprovechar la corrección de errores.
+		\item Evaluar comparativamente el desempeño del sistema con y sin reconstrucción de la señal, tanto en simulaciones como en adquisiciones reales.
+	\end{itemize}
+	
+	\section*{2 - Marco Teórico}
+	
+	Un sistema de radar biestático pasivo utiliza una señal externa, llamada \textbf{iluminador de oportunidad}, para realizar la detección de objetivos. El sistema consta de dos antenas:  
+	\begin{itemize}
+		\item La antena del \textbf{canal de referencia}, que capta la señal directa desde el transmisor ($x_r$).  
+		\item La antena del \textbf{canal de vigilancia}, que capta la señal reflejada en un posible objetivo ($x_e$).  
+	\end{itemize}
+	
+	A partir de estas dos señales, se aplican correlaciones cruzadas que permiten estimar:  
+	\begin{itemize}
+		\item El \textbf{retardo} entre $x_e$ y $x_r$, asociado a la distancia del blanco.  
+		\item El \textbf{desplazamiento Doppler}, asociado a su velocidad radial.  
+	\end{itemize}
+	
+	Un problema de este enfoque es que la señal de referencia real está contaminada por ruido y multitrayectoria, lo que degrada la SNR y reduce la probabilidad de detección.  
+	
+	En este proyecto, el iluminador será la \textbf{Televisión Digital Terrestre ISDB-Tb}, adoptada en Argentina a través de la resolución 7/2013 -- Anexo 1. Aunque ocupa un ancho de banda de 6–8 MHz, se trabajará únicamente con el segmento central \textbf{1-seg}, diseñado para receptores móviles. Esta decisión facilita la adquisición y reduce la complejidad de procesamiento.  
+	
+	El planteo del trabajo consiste en \textbf{reconstruir y remodular la señal de referencia}, aplicando la corrección de errores definida en la norma, con el fin de obtener una señal de mayor calidad para la correlación radar.
+	
+	\section*{3 - Modelo Base del Sistema}
+	En la Figura \ref{model} se puede ver un diagrama ilustrativo de la cadena de procesamiento planteada en el proyecto.
+		\begin{figure}[ht]
+			\centering
+			
+			\includegraphics[width= .7\textwidth]{Procesamiento_pr.png}
+			\caption{Modelo en bloques de prototipo del proyecto}
+			\label{model}
+		\end{figure}
+		\newpage
+		En donde cada bloque cumple las siguientes funcionalidades:
+		\begin{itemize}
+			\item Reconstrucción: demodulación y remodulación de la señal de referencia
+			\item Filtro Clutter: filtro encargado de eliminar los ecos sin desplazamiento doppler, clutter, que enmascaran objetivos en movimiento.
+			\item Cálculo Rango-Doppler: Procesamiento de correlación para estimar el rango y desplazamiento doppler de un posible objetivo
+			\item Detección: Test de hipótesis para detección de objetivos  
+		\end{itemize}
+	\section*{4 - Factibilidad}
+	
+	El proyecto es factible de realizarse, ya que requiere únicamente de:
+	\begin{itemize}
+		\item Una PC con recursos de cómputo moderados.
+		\item Herramientas de simulación y procesamiento de señales como MATLAB/Python.
+		\item Medios de adquisición de datos, tales como una radio definida por software (SDR).
+	\end{itemize}
+	
+	\section*{5 - Tareas y Cronograma}
+	
+	Para alcanzar los objetivos se propone el siguiente plan de trabajo:
+	
+	\begin{enumerate}
+		\item Revisión bibliográfica sobre radares pasivos y la resolución 7/2013 -- Anexo 1 de la Enacom sobre la transmisión de TDT (Tv Digital Terrestre).
+		
+		\item Simulación de transmisor/receptor ISDB-T.
+		\item Desarrollo de los bloques y algoritmos de procesamiento radar.
+
+		\item Adquisición y procesamiento de datos reales. 
+		\item Redacción del informe final y conclusiones.
+	\end{enumerate}
+	
+	\textbf{Cronograma tentativo (en meses):}
+	
+	\begin{tabular}{|c|c|c|c|c|c|c|}
+		\hline
+		Tarea & 1 & 2 & 3 & 4 & 5 & 6 \\
+		\hline
+		Revisión bibliográfica & X & X & X  &   &   &      \\
+		
+		Simulación ISDB-T &   &  X & X & X & X  &     \\
+		Desarrollo de procesamiento radar. & & & X & X & X & X \\ 
+		Adquisición de datos &   &   &   &   &  X & X    \\
+		Redacción informe final &   &   &   &   &   &    X \\
+		\hline
+	\end{tabular}
+	
+	
+	\cleardoublepage
+	\addcontentsline{toc}{chapter}{Bibliografía}
+	\nocite{isdbt}
+	\nocite{malanowski}
+	\nocite{richards2014radar}
+	\printbibliography
+	
+	
+\end{document}

@@ -1,0 +1,96 @@
+\chapter{Cadena de procesamiento radar}
+	
+	\section{Filtro de clutter y rayo directo}
+
+	La detección de objetivos en un radar pasivo se ve limitada, en gran medida, por la presencia de la interferencia de trayectoria directa (ITD) y por las reflexiones de clutter. Ambos componentes suelen dominar la señal recibida y generan lóbulos secundarios en la función de ambigüedad cruzada que pueden ocultar ecos débiles, aun cuando éstos se encuentren por encima del nivel de ruido del receptor. Este problema es especialmente crítico si se considera que, para los valores típicos del producto *BT* utilizados en aplicaciones reales, las fluctuaciones residuales pueden situarse varios decibelios por encima de los ecos de interés.
+	
+	En este contexto, el filtrado adaptativo se convierte en una herramienta fundamental para mejorar el rango dinámico efectivo del sistema. La señal de vigilancia está compuesta por la contribución directa del transmisor, por múltiples reflexiones estacionarias de distinto retardo (clutter), por los ecos de los objetivos en movimiento y por ruido. La ITD suele ser el componente de mayor potencia, seguida por el clutter, cuyas copias retardadas de la señal de referencia pueden estar entre 20 y 40 dB por debajo de la trayectoria directa. Ambos, no obstante, se mantienen muy por encima del ruido térmico o del ruido antropogénico dominante en bandas UHF y VHF, generando un enmascaramiento que debe ser reducido mediante procesamiento digital.
+	
+	Si bien existen métodos físicos o analógicos para mitigar estas interferencias, como el blindaje de antenas o la cancelación en RF, su efectividad es limitada. Por este motivo, prácticamente todas las implementaciones modernas recurren a técnicas digitales de cancelación. Entre ellas se incluyen enfoques iterativos basados en filtros adaptativos —como LMS, NLMS, RLS o estructuras en celosía— y métodos de procesamiento por bloques. Cada familia de algoritmos presenta ventajas y desventajas en términos de velocidad de convergencia, estabilidad, complejidad computacional y capacidad para discriminar componentes estrechamente espaciados en frecuencia. También existen métodos afines al filtrado adaptativo tradicional, como el algoritmo CLEAN, que permiten eliminar componentes dominantes de forma secuencial.
+	
+	El propósito de este capítulo es presentar el problema de la cancelación de clutter e ITD desde un marco unificado, describir los principales algoritmos utilizados para tal fin y analizar su comportamiento en escenarios reales. Se introduce un modelo de señal adecuado para formular el problema del filtrado adaptativo y se discute cómo las características de los ecos —tanto estacionarios como móviles— afectan la capacidad de cancelación. Finalmente, se muestran resultados obtenidos con señales reales y se examinan aspectos prácticos como la convergencia y la selectividad espectral de los filtros.
+	
+		\subsection{Filtro de lattice en bloque}
+		
+		
+		El filtro \textit{block lattice} se basa en una serie de proyecciones sucesivas entre señales, cuya dinámica queda determinada por los coeficientes de reflexión $\kappa_i$. Estos coeficientes pueden interpretarse como proyecciones normalizadas entre el error de predicción hacia adelante y el error de predicción hacia atrás en cada etapa del filtro. En términos geométricos, el cálculo de $\kappa_i$ equivale a medir cuánta energía de una señal puede explicarse mediante la otra, por lo que constituye una operación análoga al proceso de ortogonalización de Gram--Schmidt aplicado en un espacio vectorial de señales.
+		
+		Como resultado de estas proyecciones, los errores de predicción hacia atrás $b_i(n)$ se vuelven mutuamente ortogonales. Cada nuevo error contiene únicamente la parte de la señal que no pudo predecirse a partir de las etapas anteriores, garantizando así que la información aportada por cada $b_i(n)$ sea \emph{nueva} en el sentido estadístico. Esta propiedad de ortogonalidad es fundamental para la capacidad del filtro de separar componentes correlacionadas sin interferencia entre ellas.
+		
+		La ortogonalidad implica que cada $b_i(n)$ está asociado a un subespacio distinto y no superpuesto. Esto permite que las copias retardadas de la señal de referencia presentes en la señal de eco $x_e(n)$ puedan ser tratadas de manera independiente. Para cada etapa, se estima un coeficiente de correlación $h_i$ calculado como la proyección de $x_e(n)$ sobre el error de predicción hacia atrás. Este coeficiente determina cuánta contribución de $b_i(n)$ está presente en el eco.
+		
+		El proceso de cancelación del eco se realiza mediante la resta
+		\[
+		e_{i+1}(n) = e_i(n) - h_i\, b_i(n),
+		\]
+		que elimina únicamente la componente de $x_e(n)$ que está alineada con $b_i(n)$. Debido a la ortogonalidad entre los $b_i(n)$, esta operación no afecta a ninguna otra componente del eco. En consecuencia, la señal remanente conserva intacta toda porción que no esté correlacionada con la referencia, preservando así las reflexiones asociadas a objetivos reales.
+		
+		En términos geométricos, el filtro \textit{block lattice} realiza una secuencia de sustracciones ortogonales: en cada etapa, se extrae de $x_e(n)$ la proyección correspondiente a una copia retardada de la referencia. Esto permite remover el \textit{clutter} de forma progresiva y precisa, sin introducir distorsiones ni interferencias cruzadas entre etapas. Esta propiedad lo convierte en una herramienta especialmente adecuada para aplicaciones de radar pasivo, donde el eco contiene múltiples réplicas del pulso directo con distintos retardos y amplitudes.
+		
+		\figura{.5}{./pr/lattice.png}{Estructura de filtro en bloque de Lattice.}{ Fuente: \cite{malanowski}}{\label{fig:lattice}}
+		
+		En donde el algoritmo de procesamiento esta dados las ecuaciones de la Tabla \ref{table:lattice}.
+		
+		
+		\begin{table}[H]
+			
+			\centering
+			\begin{tabular}{|l|c|}
+				\hline
+				&\\
+				&
+				$k_{i+1} = 2 \cdot \dfrac{< b_i(n-1); f_i(n)>}{|| b_i(n-1)||^2 + || f_i(n)||^2} $\\
+				Predicción&\\
+				&$b_{i+1}(n) = b_i(n-1) - k_{i+1} \cdot f_i(n)$\\
+				&\\
+				&$f_{i+1}(n) = f_i(n) - k_{i+1}^\ast \cdot  b_i(n-1)$\\\hline
+				 &\\
+				
+				Filtrado&$h_i = \dfrac{<e_i(n); b_i(n)> }{|| b_i(n)||^2} $\\
+				&\\
+				&$e_{i+1}(n) = e_i(n) - b_i(n) \cdot h_i$\\\hline
+			\end{tabular}
+			\centering
+			\caption[Algoritmo de filtro lattice en bloque.]{Algoritmo de filtro lattice en bloque. Adaptado de \cite{malanowski}.}
+			\label{table:lattice}
+			
+		\end{table}
+		
+		En donde $<\bullet \hspace{3pt}; \bullet>$ representa el producto interno característico de $\mathbb{R}^N$ y $|| \bullet ||^2$ es la norma inducida por el producto interno.
+	\section{Función de ambigüedad cruzada}
+
+	\begin{equation}
+		\label{eq:caf}
+		\psi(R,V) =
+		\mathop{\int}_{-\tfrac{T}{2}}^{\tfrac{T}{2}}
+		x_e(t) \cdot \,
+		x_r^{\ast}\!\left(t - \frac{R}{c}\right) \cdot \,
+		\exp\!\left(-j\,\frac{2\pi}{\lambda} V t\right)
+		\,\mathrm{d}t
+	\end{equation}
+	
+	\begin{equation}
+		\label{eq:caf_dig}
+		\psi(m,k) =
+		\mathop{\sum}_{n = 0}^{T}
+		x_e(t) \cdot \,
+		x_r^{\ast}\!\left(n - m \right) \cdot \,
+		\exp\!\left(-j\,\frac{2\pi}{N} k n\right)
+	\end{equation}
+	
+		\subsection{Algoritmo Batch}
+		
+		
+		\figura{.5}{./pr/caf.png}{Diagrama en bloque para calcular $\psi$ con el metodo Batch. }{Fuente: \cite{malanowski}}{\label{fig:batch}}
+	\section{Detección de objetivos}
+		\subsection{Ca - CFAR}
+		Tradicionalmente, en los radares activos monostáticos, la detección se realizaba empleando una señal unidimensional, conocida como perfil de alcance. Este perfil se obtiene registrando la señal de eco tras la transmisión de un único pulso y aplicando posteriormente una compresión en rango mediante filtrado adaptado. Las muestras resultantes corresponden al tiempo rápido, el cual puede escalarse directamente con la distancia al radar.
+		
+		La Figura 6.3 presenta el diagrama en bloques de un sistema CFAR unidimensional. En cada iteración del algoritmo, el objetivo es determinar el umbral de detección asociado a la celda bajo prueba (Cell Under Test, CUT) a partir de las celdas de referencia o entrenamiento. Para ello, se considera un total de N$_w$ celdas de referencia a cada lado de la CUT. Esta, a su vez, se encuentra rodeada por N$_{g}$ celdas de guarda en cada extremo, las cuales no intervienen en la estimación del nivel de ruido. El uso de estas celdas de guarda se justifica porque el eco del blanco puede extenderse a lo largo de varias celdas de resolución —por efectos de la ventana de señal o del sobremuestreo—, lo que podría sesgar la estimación si no se evita su influencia directa. Por lo tanto, el número de celdas de guarda debe seleccionarse considerando el ancho esperado del eco recibido.
+		
+		La estimación del nivel de ruido a partir de las celdas de referencia puede realizarse de diversas maneras. Una de las más simples —y aún hoy entre las más empleadas— es el método Cell Averaging CFAR (CA-CFAR). En este enfoque, la estimación del nivel de ruido se obtiene calculando el valor medio de las muestras pertenecientes a ambas ventanas de referencia.
+		
+		\begin{equation}
+			\hat{\sigma} = \dfrac{1}{2 \cdot N_w} \left(\hspace{5pt} \sum_{i = n - N_w - N_g}^{n - N_g - 1} x(i) \hspace{5pt} + \hspace{5pt} \sum_{i = n+N_g+1 }^{n + N_w + N_g}  x(i) \hspace{5pt}\right)
+		\end{equation}
+			

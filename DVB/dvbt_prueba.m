@@ -1,8 +1,9 @@
 close all; clear; clc;
 
 addpath('..\funciones\')
-cargar_data = 0;
-Rate = 7/8;
+load("data_mpeg.mat")
+
+Rate = 2/3;
 Const = 4;
 Coder = Coder(Rate,2,Const);
 Decoder = Decoder(2);
@@ -10,17 +11,11 @@ Decoder = Decoder.Set_Mod(Const);
 Decoder = Decoder.Set_Rate(Rate);
 
 
-%%
-if cargar_data
-    load("c_data.mat"); %#ok<*NOPRT> 
-    
-else
-    
-    rng(23); %#ok<*NOPRT> 
-    sym = randi([0 255],1, 188*800);
-    coded_data = Coder.CD(sym);
-end
 
+sym = Coder.RandMpeg(data_mpeg);
+%%
+coded_data = Coder.CD(sym);
+%10.57
 
 %%
 [bit_intrl, left_bits] = Coder.Bit_Intrlv(coded_data);
@@ -31,9 +26,9 @@ end
 ak = Coder.Bi2QAM(symb_intrl);
 
 
-[ofdm_frame, ak_sin_uso] = Coder.Frame(ak,21,1,0, 3/4, 0, 1/4);
+[ofdm_frame, ak_sin_uso] = Coder.Frame(ak,21,1,0, Rate, 0, 1/4);
 
-[ofdm_frame2, ak_sin_uso2] = Coder.Frame(ak_sin_uso,21,1,0, 3/4, 0, 1/4);
+[ofdm_frame2, ak_sin_uso2] = Coder.Frame(ak_sin_uso,21,2,0, Rate, 0, 1/4);
 
 %%
 

@@ -3,3 +3,13 @@ prueba.wav
 *.py
 *.mpeg
 *.ts
+*.aux
+*.bbl
+*,bcf
+*.lof
+*.run
+*.synctex
+*.toc
+*.blg
+*.asv
+*.iso

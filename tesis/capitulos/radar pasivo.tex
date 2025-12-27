@@ -1,0 +1,197 @@
+
+\chapter{Radar Pasivo}
+	El radar pasivo se diferencia del radar activo en que no cuenta con un transmisor propio, sino que utiliza fuentes externas de iluminación, como emisores de telecomunicaciones. La detección de objetivos se realiza comparando la señal directa del transmisor con la señal reflejada por el blanco.
+	
+	Para este fin, el sistema dispone al menos de dos canales de recepción: referencia y eco. El canal de referencia obtiene la señal original transmitida orientando una antena direccional hacia la fuente emisora o generando digitalmente un haz en esa dirección. El canal de eco, en cambio, capta la señal reflejada desde la zona bajo vigilancia mediante otra antena o un haz formado digitalmente.
+	
+	El procesamiento conjunto de ambas señales permite detectar los objetivos. La medición principal en radar pasivo es el alcance biestático, definido como la diferencia entre la distancia transmisor–objetivo–receptor y la distancia transmisor–receptor. Los puntos con igual alcance biestático se ubican sobre un elipsoide cuyos focos son el transmisor y el receptor.
+	
+	Además, el radar pasivo mide el desplazamiento Doppler, proporcional a la velocidad biestática, es decir, la variación temporal del alcance biestático. La localización de objetivos en coordenadas cartesianas puede obtenerse calculando el punto de intersección de varios elipsoides biestáticos generados por diferentes pares transmisor–receptor. Alternativamente, la posición del blanco puede estimarse combinando la información de alcance biestático con la dirección de llegada de la señal, un método similar al que emplea el radar monostático clásico
+	
+	
+	\section{Geometría y coordenadas biestáticas}
+	
+	Consideremos la geometría de un radar pasivo en coordenadas cartesianas. Un blanco se encuentra en la posición \((x(t), y(t), z(t))\); el transmisor está ubicado en \((x_{t}, y_{t}, z_{t})\) y el receptor en \((x_{r}, y_{r}, z_{r})\). Esto no permite definir los siguientes rangos: el rango transmisor-objetivo ($R_1$), el receptor-objetivo ($R_2$) y el rango transmisor-receptor ($R_b$).
+	\begin{equation}
+		R_1(t) = \sqrt{(x(t) - x_t)^2 + (y(t) - y_t)^2  +(z(t) - z_t)^2}
+	\end{equation}
+	
+	\begin{equation}
+	R_2(t) = \sqrt{(x(t) - x_r)^2 + (y(t) - y_r)^2  +(z(t) - z_r)^2}
+	\end{equation}
+	
+	\begin{equation}
+	R_b = \sqrt{(x_t - x_b)^2 + (y_t - y_b)^2  +(z_t - z_b)^2}
+	\end{equation}
+	
+	En donde el ángulo entre los segmentos transmisor–objetivo y receptor–objetivo, denotado por \(\beta\), se conoce como ángulo biestático.
+	\figura{.4}{./pr/geometria.png}{Geometría en un esquema biestático.}{ Fuente: \cite{malanowski}.}{\label{fig:geo}}
+	
+	
+	
+	El rango biestático se calcula a partir de la diferencia entre el camino directo, $R_b$, y el indirecto, $R_1(t) + R_2(t)$. Esto puede hacerse a partir del retardo \(\tau\) medido entre las señales de eco y de referencia, y la velocidad de la luz \(c\).
+	
+	\begin{equation}
+		R(t) = R_1(t) - R_2(t) - R_b = c \cdot \tau
+		\label{eq:rango_biestatico}
+	\end{equation}
+	
+	El lugar geométrico de los puntos con igual rango biestático forma un elipsoide biestático en el espacio tridimensional.  
+	Los focos de este elipsoide se encuentran en las posiciones del transmisor y del receptor.  
+	La intersección bidimensional de este elipsoide con un plano que contiene al transmisor y al receptor forma una elipse biestática.
+	\figura{.6}{./pr/rango_bi_3d.png}{Elipsoide biestático de iso-rango.}{ Fuente: \cite{malanowski}.}{\label{fig:rango_3d}}
+	\figura{.6}{./pr/rango_bi.png}{Elipses biestáticas.}{ Fuente: \cite{malanowski}.}{\label{fig:rango}}
+	
+	
+	
+	En la Figura~\ref{fig:rango} se presenta un ejemplo de una familia de elipses biestáticas, en donde  rango biestático creciente corresponde a elipses biestáticas de mayor tamaño.
+	
+	
+	Además del rango biestático, otro parámetro que se mide rutinariamente con el radar pasivo es la velocidad biestática.  
+	Esta se define como la derivada temporal del rango biestático.  
+	
+	La velocidad biestática se calcula a partir del desplazamiento Doppler \(f_{d}\) medido entre las señales de referencia y de eco, y de la longitud de onda \(\lambda = \frac{c}{f_{c}}\), donde \(f_{c}\) es la frecuencia portadora:
+	
+	\begin{equation}
+		V = \dfrac{\partial R}{\partial t} = -\lambda f_d
+		\label{eq:vel_biestatica}
+	\end{equation}
+	
+	
+		
+		
+	\section{Ecuación Radar}
+	
+	 Se ilustra el esquema básico. La distancia entre el transmisor y el objetivo es $R_{1}$, mientras que la distancia entre el objetivo y el receptor es $R_{2}$. El transmisor emite una potencia $P_{t}$.
+	
+	Si la radiación fuera isotrópica, es decir, con igual intensidad en todas las direcciones, la densidad de potencia a una distancia $R_{1}$ sería igual a la potencia total emitida dividida por el área de la esfera de radio $R_{1}$, es decir $4\pi R_{1}^{2}$. Sin embargo, la directividad de la antena transmisora $G_{t}$ multiplica la densidad de potencia en la dirección de máxima radiación. Suponiendo que el objetivo se encuentra a la distancia $R_{1}$ en esa dirección, la densidad de potencia incidente sobre el blanco puede expresarse como:
+	
+	\begin{equation}
+		S_{1}=\frac{P_{t} G_{t}}{4\pi R_{1}^{2}}
+		\label{eq:S1}
+	\end{equation}
+	
+	La cantidad de potencia reflejada por el objetivo está determinada por su sección eficaz radar (RCS, por sus siglas en inglés) $\sigma$. Esta magnitud, expresada en unidades de área (por ejemplo, m$^{2}$), se define como:
+	
+	\begin{equation}
+		\sigma = \lim_{R\to\infty}\frac{4\pi R^{2} S_{s}}{S_{i}}
+		\label{eq:sigma}
+	\end{equation}
+	
+	donde $S_{s}$ es la densidad de potencia dispersada y $S_{i}$ es la densidad de potencia incidente.
+	En este modelo teórico se asume que la potencia dispersada se irradia isotrópicamente. En la práctica esta condición no siempre se cumple, pero resulta útil para definir $\sigma$. En la ecuación anterior, $4\pi R^{2}$ es el área de una esfera de radio $R$; al multiplicarla por la densidad dispersada $S_{s}$ se obtiene la potencia total reflejada por el blanco. Así, la RCS representa la relación entre la potencia dispersada y la densidad de potencia incidente.
+	
+	En un radar pasivo, la RCS relevante es la biestática, pues la onda incidente y la onda dispersada viajan en direcciones distintas, correspondientes al transmisor y al receptor respectivamente.
+	
+	Asumiendo que la densidad de potencia incidente es $S_{1}$, la densidad de potencia reflejada a la distancia $R_{2}$ desde el blanco, con una RCS biestática $\sigma$, es:
+	
+	\begin{equation}
+		S_{2}=\frac{P_{t} G_{t} \sigma}{(4\pi)^{2} R_{1}^{2} R_{2}^{2}}
+		\label{eq:S2}
+	\end{equation}
+	
+	La potencia recibida por el radar se determina a partir de la densidad de potencia $S_{2}$ y del área efectiva de la antena receptora $A_{\text{ef}}$:
+	
+	\begin{equation}
+		P_{r}=\frac{P_{t} G_{t} \sigma A_{\text{ef}}}{(4\pi)^{2} R_{1}^{2} R_{2}^{2}}
+		\label{eq:PrAef}
+	\end{equation}
+	
+	Habitualmente, la antena receptora se caracteriza mediante su ganancia $G_{r}$, la cual se relaciona con el área efectiva de acuerdo con:
+	
+	\begin{equation}
+		A_{\text{ef}}=\frac{G_{r}\lambda^{2}}{4\pi}
+		\label{eq:Aef}
+	\end{equation}
+	
+	Sustituyendo esta expresión en la ecuación~\eqref{eq:PrAef}, la potencia de eco recibida por el radar resulta:
+	
+	\begin{equation}
+		P_{r}=\frac{P_{t} G_{t} \sigma G_{r} \lambda^{2}}{(4\pi)^{3} R_{1}^{2} R_{2}^{2}}
+		\label{eq:PrFinal}
+	\end{equation}
+	
+
+	\section{Iluminadores de Oportunidad}
+	
+	A diferencia de un sistema de radar convencional, en un radar biestático pasivo no generamos la señal de referencia, pero podemos elegir cuál utilizar. Dependiendo de la aplicación, cada señal tendrá sus ventajas y desventajas. Los dos principales parámetros para seleccionar el iluminador son la frecuencia y el ancho de banda.
+	
+	Al observar la ecuación de resolución en rango, podemos ver que aumentar el ancho de banda reduce el tamaño de la celda de resolución en rango; además, al incrementar la frecuencia también aumentan las pérdidas por propagación en el espacio libre, dadas por
+	
+	\begin{equation}
+		\label{eq:pel}
+		\alpha_{PEL} = \left(\frac{4 \pi d f}{c}\right)^2
+	\end{equation}
+	
+	donde \(f\), \(d\) y \(c\) representan la frecuencia, la distancia recorrida por la señal y la velocidad de la luz, respectivamente. Esto determina el rango máximo de detección antes de que la señal se atenúe por completo.
+	
+	Algunas de las señales más comunes para este uso son:
+	
+	\begin{table}[H]
+		
+		\begin{tabular}{l l l l}
+			\hline
+			Iluminador & Banda de frecuencia & BW & P$_{t}$ \\
+			\hline
+			DVB-T & 470--860 MHz & 7.6 MHz & Máx. 100 kW \\
+			GSM & 935--960 MHz & 200 kHz & Máx. 320 W \\
+			LTE & 700 MHz--2.6 GHz & 1.4--20 MHz & Máx. 200 mW \\
+			WiFi & 2.4 GHz--5 GHz--6 GHz & 16 MHz & Máx. 200 mW \\
+			\hline
+		\end{tabular}
+		\centering
+		\caption[Ejemplos de iluminadores para radar pasivo.]{Ejemplos de iluminadores para radar pasivo. Adaptado de \cite{malanowski}.}
+		\label{iluminadores}
+	\end{table}
+	
+	En este trabajo se eligió la señal de TDT. Uno de los motivos es que su estructura y procesamiento están estrictamente definidos, lo que permite conocer exactamente cómo la estación transmisora emitió la señal y qué pasos seguir para demodularla y volverla a modular. Sin embargo, un problema intrínseco de esta señal es la aparición de lóbulos laterales determinísticos debido a sus prefijos cíclicos y herramientas de sincronización (véase Capítulo~4).
+	
+	Si bien originalmente la señal de TDT cuenta con un ancho de banda de aproximadamente 8 GHz, utilizar el espectro completo complejiza notablemente el modulador y el demodulador, por lo que se optó por emplear el segmento central de transmisión parcial. Este cuenta con un ancho de banda de [completar], el cual es menor pero suficiente para aplicarlo como base de trabajo.
+	
+
+	\section{Canal de referencia y canal de vigilancia}
+	
+	
+	Tomando a la señal de referencia como
+	
+	\begin{equation}
+		\label{eq:env_compeja_xr}
+		x_r^{RF}(t) = \mathfrak{R}\left\lbrace x_r(t) \cdot exp(j2\pi f_ct)\right\rbrace
+	\end{equation}
+	en donde $x_r^{RF}(t)$ es la señal pasabanda real, $f_c$ es la frecuencia central y $x_r(t)$ es su envolvente compleja. Podemos definir a nuestra señal eco como
+	
+	
+	\begin{equation}
+		\label{eq:env_compeja_xe}
+		x_e^{RF}(t) = \mathfrak{R}\left\lbrace C \cdot x_r(t-\frac{r(t)}{c}) \cdot exp(j2\pi f_c(t - \frac{r(t)}{c}))\right\rbrace
+	\end{equation}
+	
+	Teniendo en cuenta que podemos expandir a r(t) usando la serie de taylor
+	\begin{equation}
+		r(t) = \sum_{k=0}^\infty \dfrac{r^{(k)}(t)}{k!}t^k = R + Vt + A\frac{t^2}{2}+ \cdots 
+	\end{equation}
+	podemos entonces aproximarlo como
+	\begin{equation}
+		\label{eq:aprox_rango}
+		r(t) \approx R + Vt
+	\end{equation}
+	
+	Usando la ecuación \ref{eq:aprox_rango}, la envolvente compleja de la señal eco queda
+	
+	
+	\begin{equation}
+		\label{eq:aprox_env_xe}
+		x_e(t) \approx  C'exp(j\frac{2\pi}{\lambda}R) \cdot x_r(t - \frac{R}{c})exp(j\frac{2\pi}{\lambda}Vt) )
+	\end{equation}
+	con C$'$ es la amplitud compleja del eco	
+	
+	Idealmente, cada canal debería estar aislado del otro y las señales no deberían contener componentes de los canales opuestos. Sin embargo, esto representa un problema ya que, por más directivas que sean las antenas, siempre se filtrará cierta cantidad de potencia. 
+	\figura{1}{./pr/canales.png}{Correlación entre antenas de vigilancia y referencia.}{ Fuente: \cite{malanowski}.}{\label{fig:canales}}
+	En la Figura~\ref{fig:canales} se observa cómo una componente de la señal eco, $A_{surv}(\phi_{tx})$, es captada por el diagrama de radiación de la antena de vigilancia (línea sólida) y, de forma inversa, la señal de referencia, $A_{ref}(\phi_{target})$, es recibida por la antena de vigilancia (línea punteada). 
+	
+	En el caso del canal de referencia, esta interferencia no implica una gran diferencia, dado que la potencia del eco es despreciable. Sin embargo, lo mismo no ocurre en sentido inverso, ya que sin un tratamiento previo la señal directa enmascara completamente al objetivo. Este fenómeno se conoce como \textit{interferencia de señal directa} (DSI, por sus siglas en inglés) y debe tratarse adecuadamente junto con los rebotes sin desplazamiento Doppler, es decir, el \textit{clutter}.  
+	
+	De forma análoga a un radar convencional, se aplica un filtro anti-\textit{clutter} encargado de eliminar de la señal eco todos los componentes con $f_{\text{doppler}}$ nula. La selectividad con la que se suprimen estos componentes depende del tipo de filtro y de la cantidad de coeficientes empleados.
+      
+	
+	\figura{.6}{./pr/filtro.png}{Diagrama de un filtro anti clutter.}{}{\label{fig:filtro_clutter}}
